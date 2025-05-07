@@ -34,15 +34,10 @@ public class PlayerLocomotionManager : CharacterLocomotionManager
     {
         verticalMovement = PlayerInputManager.instance.verticalInput;
         horizontalMovement = PlayerInputManager.instance.horizontalInput;
-        moveAmount = PlayerInputManager.instance.moveAmount;
     }
 
     private void HandleGroundedMovement()
     {
-        if(!playerManager.canMove)
-        {
-            return;
-        }
         GetMovementValues();
 
         moveDirection = PlayerCamera.instance.transform.forward * verticalMovement;

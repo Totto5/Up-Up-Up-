@@ -15,4 +15,14 @@ public class PlayerManager : CharacterManager
         base.Update();
         playerLocomotionManager.HandleAllMovement();
     }
+    public void OnSpwawnPlayer()
+    {
+        playerLocomotionManager.enabled = true;
+        PlayerCamera.instance.playerManager = this;
+    }
+    protected override void LateUpdate()
+    {
+        base.LateUpdate();
+        PlayerCamera.instance.HandleAllCameraActions();
+    }
 }
