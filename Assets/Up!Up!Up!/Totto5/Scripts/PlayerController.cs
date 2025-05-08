@@ -80,4 +80,5 @@ public class PlayerController : MonoBehaviour
         // 実際に動かす
         _characterController.Move(move * Time.deltaTime);
     }
+    
 }
