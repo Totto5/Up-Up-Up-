@@ -24,7 +24,6 @@ public class PlayerLocomotionManager : CharacterLocomotionManager
         base.Awake();
         playerManager = GetComponent<PlayerManager>();
     }
-
     public void HandleAllMovement()
     {
         HandleGroundedMovement();
