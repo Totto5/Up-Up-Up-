@@ -1,72 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerInputManager : MonoBehaviour
 {
     public static PlayerInputManager instance;
-    public PlayerInputManager player;
-    PlayerControls playerControls;
 
-    [Header("PLAYER MOVEMENT INPUT")]
-    [SerializeField] Vector2 movementInput;
+    private PlayerControls inputActions;
+
+    [Header("Movement Input")]
+    public Vector2 movementInput;
     public float horizontalInput;
     public float verticalInput;
     public float moveAmount;
-    [Header("CAMERA MOVEMENT INPUT")]
-    [SerializeField] Vector2 cameraMovementInput;
-    public float cameraHorizontalInput;
-    public float cameraVerticalInput;
 
+    [Header("Camera Input")]
+    public Vector2 cameraInput;
+    public float cameraX;
+    public float cameraY;
+
+    [Header("Actions")]
+    public bool jumpInput;
+    public bool climbInput;
 
     private void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+
+        inputActions = new PlayerControls();
+
+        inputActions.PlayerMovement.Movement.performed += ctx => movementInput = ctx.ReadValue<Vector2>();
+        inputActions.PlayerMovement.Movement.canceled += ctx => movementInput = Vector2.zero;
+
+        inputActions.CameraMovement.Movement.performed += ctx => cameraInput = ctx.ReadValue<Vector2>();
+        inputActions.CameraMovement.Movement.canceled += ctx => cameraInput = Vector2.zero;
+
+        inputActions.PlayerAction.Jump.performed += ctx => jumpInput = true;
+        inputActions.PlayerAction.Climb.performed += ctx => climbInput = true;
     }
-    public void Update()
-    {
-        HandleAllInput();
-    }
-    private void HandleAllInput()
-    {
-        // Handle all input here
-        // For example, you can call methods to handle movement, jumping, etc.
-        HandlePlayerMovementInput();
-        HandleCameraMovementInput();
-    }
-    private void HandlePlayerMovementInput()
+
+    private void OnEnable() => inputActions.Enable();
+    private void OnDisable() => inputActions.Disable();
+    public void ResetClimbInput() => climbInput = false;
+
+    private void Update()
     {
         horizontalInput = movementInput.x;
         verticalInput = movementInput.y;
 
         moveAmount = Mathf.Clamp01(Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));
 
-        if(moveAmount <= 0.5 && moveAmount > 0) {
-            moveAmount = 0.5f;
-        }else if(moveAmount > 0.5 && moveAmount < 1) {
-            moveAmount = 1f;
-        }
+        cameraX = cameraInput.x;
+        cameraY = cameraInput.y;
     }
-    private void HandleCameraMovementInput(){
-        cameraVerticalInput = cameraMovementInput.y;
-        cameraHorizontalInput = cameraMovementInput.x;
-    }
-    private void OnEnable()
-    {
-        if (playerControls == null)
-        {
-            playerControls = new PlayerControls();
 
-            playerControls.PlayerMovement.Movement.performed += ctx => movementInput = ctx.ReadValue<Vector2>();
-            playerControls.CameraMovement.Movement.performed += ctx => cameraMovementInput = ctx.ReadValue<Vector2>();
-        }
-        playerControls.Enable();
-    }
+    public void ResetJumpInput() => jumpInput = false;
 }

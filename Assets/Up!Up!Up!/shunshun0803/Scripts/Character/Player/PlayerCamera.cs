@@ -56,9 +56,9 @@ public class PlayerCamera : MonoBehaviour
         transform.position = targetPosition;
     }
     private void HandleRotation(){
-        leftAndRightLookAngle += (PlayerInputManager.instance.cameraHorizontalInput * leftAndRightRotationSpeed) * Time.deltaTime;
+        leftAndRightLookAngle += (PlayerInputManager.instance.cameraX * leftAndRightRotationSpeed) * Time.deltaTime;
 
-        upAndDownLookAngle -= (PlayerInputManager.instance.cameraVerticalInput * upAndDownRotationSpeed) * Time.deltaTime;
+        upAndDownLookAngle -= (PlayerInputManager.instance.cameraY * upAndDownRotationSpeed) * Time.deltaTime;
 
         upAndDownLookAngle = Mathf.Clamp(upAndDownLookAngle, minimumPivot, maximumPivot);
 

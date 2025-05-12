@@ -1,75 +1,144 @@
-using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class PlayerLocomotionManager : CharacterLocomotionManager
+public class PlayerLocomotionManager : MonoBehaviour
 {
-    PlayerManager playerManager;
+    CharacterController controller;
+    PlayerInputManager input;
+    PlayerAnimatorManager animator;
 
-    [HideInInspector] public float verticalMovement;
-    [HideInInspector] public float horizontalMovement;
-    [HideInInspector] public float moveAmount;
+    public float walkSpeed = 2f;
+    public float runSpeed = 5f;
+    public float rotationSpeed = 15f;
+    public float gravity = -9.81f;
+    public float jumpHeight = 3f;
 
-    [Header("Movement Settings")]
     private Vector3 moveDirection;
-    private Vector3 targetRotationDirection;
-    [SerializeField] private float walkSpeed = 2f;
-    [SerializeField] private float runSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 15f;
+    private Vector3 velocity;
+    private bool isGrounded;
 
-    protected override void Awake()
+    [SerializeField] private float climbHeight = 1.0f;
+    [SerializeField] private float climbRayOriginY = 1.5f;
+    [SerializeField] private float climbRayDistance = 1.0f;
+    private bool justClimbed = false;
+
+
+    private void Start()
     {
-        base.Awake();
-        playerManager = GetComponent<PlayerManager>();
+        controller = GetComponent<CharacterController>();
+        input = PlayerInputManager.instance;
+        animator = GetComponent<PlayerAnimatorManager>();
     }
-    public void HandleAllMovement()
+
+    private void Update()
     {
-        HandleGroundedMovement();
+        HandleMovement();
         HandleRotation();
-    }
-    private void GetMovementValues()
-    {
-        verticalMovement = PlayerInputManager.instance.verticalInput;
-        horizontalMovement = PlayerInputManager.instance.horizontalInput;
+        HandleJump();
+        HandleClimb();
+        ApplyGravity();
+        ApplyFinalMovement();
+
+        if (justClimbed)
+        {
+            controller.Move(Vector3.down * 0.05f);
+            justClimbed = false;
+        }
     }
 
-    private void HandleGroundedMovement()
+    void HandleMovement()
     {
-        GetMovementValues();
+        isGrounded = controller.isGrounded;
 
-        moveDirection = PlayerCamera.instance.transform.forward * verticalMovement;
-        moveDirection = moveDirection + PlayerCamera.instance.transform.right * horizontalMovement;
+        if (!controller.enabled) return; // 無効なら移動をスキップ
+
+        Vector3 forward = Camera.main.transform.forward;
+        Vector3 right = Camera.main.transform.right;
+
+        forward.y = 0;
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        moveDirection = forward * input.verticalInput + right * input.horizontalInput;
         moveDirection.Normalize();
-        moveDirection.y = 0;
 
-        if( PlayerInputManager.instance.moveAmount > 0.5f)
-        {
-            playerManager.characterController.Move(moveDirection * runSpeed * Time.deltaTime);
-        }
-        else if(PlayerInputManager.instance.moveAmount <= 0.5f)
-        {
-            playerManager.characterController.Move(moveDirection * walkSpeed * Time.deltaTime);
-        }
-    }
+        float speed = input.moveAmount > 0.5f ? runSpeed : walkSpeed;
 
-    private void HandleRotation()
+        controller.Move(moveDirection * speed * Time.deltaTime);
+        animator.UpdateAnimator(input.moveAmount, isGrounded);
+        }
+
+    void HandleRotation()
     {
-        targetRotationDirection = Vector3.zero;
-        targetRotationDirection = PlayerCamera.instance.cameraObject.transform.forward * verticalMovement;
-        targetRotationDirection = targetRotationDirection + PlayerCamera.instance.cameraObject.transform.right * horizontalMovement;
-        targetRotationDirection.Normalize();
-        targetRotationDirection.y = 0;
+        if (moveDirection == Vector3.zero) return;
 
-        if(targetRotationDirection == Vector3.zero)
-        {
-            targetRotationDirection = transform.forward;
-        }
-        Quaternion newRotation = Quaternion.LookRotation(targetRotationDirection);
-        Quaternion targetRotation = Quaternion.Slerp(transform.rotation, newRotation, rotationSpeed * Time.deltaTime);
-        transform.rotation = targetRotation;
+        Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
+    void HandleJump()
+    {
+        if (input.jumpInput && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            animator.TriggerJump();
+            input.ResetJumpInput(); // 入力直後にリセット
+        }
+    }
 
+    void ApplyGravity()
+    {
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; // 安定化
+        }
+        velocity.y += gravity * Time.deltaTime;
+    }
+
+    void ApplyFinalMovement()
+    {
+        if (!controller.enabled) return;
+        controller.Move(Vector3.up * velocity.y * Time.deltaTime);
+    }
+    void HandleClimb()
+    {
+        if (input.climbInput)
+        {
+            input.ResetClimbInput();
+
+            if (CheckForClimbableWall(out RaycastHit hit))
+            {
+                StartCoroutine(ClimbRoutine(hit));
+            }
+        }
+    }
+
+    bool CheckForClimbableWall(out RaycastHit hit)
+    {
+        Vector3 origin = transform.position + Vector3.up * climbRayOriginY;
+        return Physics.Raycast(origin, transform.forward, out hit, climbRayDistance);
+    }
+
+    IEnumerator ClimbRoutine(RaycastHit hit)
+    {
+        controller.enabled = false;
+        animator.TriggerClimb(); // AnimatorManager に作る
+
+        Vector3 target = hit.point + Vector3.up * climbHeight;
+        Vector3 start = transform.position;
+        float t = 0;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime;
+            transform.position = Vector3.Lerp(start, target, t);
+            yield return null;
+        }
+
+        controller.enabled = true;
+        justClimbed = true;
+    }
 }
