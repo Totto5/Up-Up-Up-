@@ -13,7 +13,6 @@ public class PlayerManager : CharacterManager
     protected override void Update()
     {
         base.Update();
-        playerLocomotionManager.HandleAllMovement();
     }
     public void OnSpwawnPlayer()
     {

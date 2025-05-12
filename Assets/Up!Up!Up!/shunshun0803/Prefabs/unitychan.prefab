@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 05d5315467e0546a0beb2ef4ac93644b, type: 2}
+    - target: {fileID: 9500000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 13700000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       propertyPath: m_DirtyAABB
       value: 0
@@ -167,7 +171,7 @@ PrefabInstance:
       addedObject: {fileID: 8409796555665446571}
     - targetCorrespondingSourceObject: {fileID: 100326, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8706665269975209553}
+      addedObject: {fileID: 491656746491520680}
   m_SourcePrefab: {fileID: 100100000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
 --- !u!1 &3310154000468794835 stripped
 GameObject:
@@ -227,13 +231,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c41d6b99eb40f41f48a8605fb256d485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  verticalMovement: 0
-  horizontalMovement: 0
-  moveAmount: 0
   walkSpeed: 2
   runSpeed: 5
   rotationSpeed: 15
---- !u!114 &8706665269975209553
+  gravity: -9.81
+  jumpHeight: 3
+  climbHeight: 1
+  climbRayOriginY: 1.5
+  climbRayDistance: 1
+--- !u!114 &491656746491520680
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -242,6 +248,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3310154000468794835}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04e00471df4c049b0b1b4c0b17cebe98, type: 3}
+  m_Script: {fileID: 11500000, guid: 1509cb3d0d898421c82837df5a10ad5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
