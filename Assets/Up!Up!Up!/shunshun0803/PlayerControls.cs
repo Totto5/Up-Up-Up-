@@ -188,6 +188,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Slow"",
+                    ""type"": ""Button"",
+                    ""id"": ""e1ddb158-9afa-48eb-b2a8-7f627c92f023"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -212,6 +221,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Climb"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9777182e-bae7-4413-97fc-4eb01d2bbc1d"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Slow"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -228,6 +248,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerAction = asset.FindActionMap("PlayerAction", throwIfNotFound: true);
         m_PlayerAction_Jump = m_PlayerAction.FindAction("Jump", throwIfNotFound: true);
         m_PlayerAction_Climb = m_PlayerAction.FindAction("Climb", throwIfNotFound: true);
+        m_PlayerAction_Slow = m_PlayerAction.FindAction("Slow", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -383,12 +404,14 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private List<IPlayerActionActions> m_PlayerActionActionsCallbackInterfaces = new List<IPlayerActionActions>();
     private readonly InputAction m_PlayerAction_Jump;
     private readonly InputAction m_PlayerAction_Climb;
+    private readonly InputAction m_PlayerAction_Slow;
     public struct PlayerActionActions
     {
         private @PlayerControls m_Wrapper;
         public PlayerActionActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Jump => m_Wrapper.m_PlayerAction_Jump;
         public InputAction @Climb => m_Wrapper.m_PlayerAction_Climb;
+        public InputAction @Slow => m_Wrapper.m_PlayerAction_Slow;
         public InputActionMap Get() { return m_Wrapper.m_PlayerAction; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -404,6 +427,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Climb.started += instance.OnClimb;
             @Climb.performed += instance.OnClimb;
             @Climb.canceled += instance.OnClimb;
+            @Slow.started += instance.OnSlow;
+            @Slow.performed += instance.OnSlow;
+            @Slow.canceled += instance.OnSlow;
         }
 
         private void UnregisterCallbacks(IPlayerActionActions instance)
@@ -414,6 +440,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Climb.started -= instance.OnClimb;
             @Climb.performed -= instance.OnClimb;
             @Climb.canceled -= instance.OnClimb;
+            @Slow.started -= instance.OnSlow;
+            @Slow.performed -= instance.OnSlow;
+            @Slow.canceled -= instance.OnSlow;
         }
 
         public void RemoveCallbacks(IPlayerActionActions instance)
@@ -443,5 +472,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     {
         void OnJump(InputAction.CallbackContext context);
         void OnClimb(InputAction.CallbackContext context);
+        void OnSlow(InputAction.CallbackContext context);
     }
 }

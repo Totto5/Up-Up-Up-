@@ -21,6 +21,7 @@ public class PlayerInputManager : MonoBehaviour
     [Header("Actions")]
     public bool jumpInput;
     public bool climbInput;
+    public bool slowInput;
 
     private void Awake()
     {
@@ -37,6 +38,9 @@ public class PlayerInputManager : MonoBehaviour
 
         inputActions.PlayerAction.Jump.performed += ctx => jumpInput = true;
         inputActions.PlayerAction.Climb.performed += ctx => climbInput = true;
+
+        inputActions.PlayerAction.Slow.performed += ctx => slowInput = true;
+        inputActions.PlayerAction.Slow.canceled += ctx => slowInput = false;
     }
 
     private void OnEnable() => inputActions.Enable();

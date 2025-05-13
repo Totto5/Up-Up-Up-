@@ -23,6 +23,13 @@ public class PlayerLocomotionManager : MonoBehaviour
     [SerializeField] private float climbRayDistance = 1.0f;
     private bool justClimbed = false;
 
+    [SerializeField] private float slowTimeScale = 0.2f;
+    [SerializeField] private float normalTimeScale = 1.0f;
+    [SerializeField] private float slowTimeTransitionSpeed = 5f;
+
+    private bool isClimbing = false;
+
+
 
     private void Start()
     {
@@ -39,6 +46,8 @@ public class PlayerLocomotionManager : MonoBehaviour
         HandleClimb();
         ApplyGravity();
         ApplyFinalMovement();
+        HandleTimeSlow();
+
 
         if (justClimbed)
         {
@@ -124,6 +133,7 @@ public class PlayerLocomotionManager : MonoBehaviour
 
     IEnumerator ClimbRoutine(RaycastHit hit)
     {
+        isClimbing = true;
         controller.enabled = false;
         animator.TriggerClimb(); // AnimatorManager に作る
 
@@ -140,5 +150,26 @@ public class PlayerLocomotionManager : MonoBehaviour
 
         controller.enabled = true;
         justClimbed = true;
+        isClimbing = false;
     }
+    void HandleTimeSlow()
+    {
+        // 空中でスロウ入力中のみ slowTimeScale に向かって補間
+        if (!isGrounded && input.slowInput && !isClimbing)
+        {
+            Time.timeScale = Mathf.Lerp(Time.timeScale, slowTimeScale, Time.unscaledDeltaTime * slowTimeTransitionSpeed);
+            Time.fixedDeltaTime = 0.02f * Time.timeScale; // 物理も合わせる
+        }
+        else if (isGrounded && input.slowInput && !isClimbing)
+        {
+            Time.timeScale = Mathf.Lerp(Time.timeScale, slowTimeScale, Time.unscaledDeltaTime * slowTimeTransitionSpeed);
+            Time.fixedDeltaTime = 0.02f * Time.timeScale; // 物理も合わせる
+        }
+        else
+        {
+            Time.timeScale = Mathf.Lerp(Time.timeScale, normalTimeScale, Time.unscaledDeltaTime * slowTimeTransitionSpeed);
+            Time.fixedDeltaTime = 0.02f * Time.timeScale;
+        }
+    }
+
 }
