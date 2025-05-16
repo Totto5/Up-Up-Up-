@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +30,21 @@ public class PauseMenu : MonoBehaviour
     
     // Pause状態を管理するフラグ
     private bool _isPaused = false;
+
+
+    private void Start()
+    {
+        
+    }
+    
+    
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            TogglePause();
+        }
+    }
 
     public void OnClick()
     {
@@ -78,6 +94,8 @@ public class PauseMenu : MonoBehaviour
             Debug.Log("Restart button clicked");
             // 現在のシーンを再読み込みする
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            // ゲームを再開する
+            Time.timeScale = 1f;
         }
         else if (selectedButton == title)
         {
@@ -103,7 +121,6 @@ public class PauseMenu : MonoBehaviour
         {
             // Pauseボタンが押されたときの処理
             Debug.Log("Pause button clicked");
-            
             if (_isPaused)
             {
                 
@@ -127,6 +144,34 @@ public class PauseMenu : MonoBehaviour
         }
     }
     
+    private void TogglePause()
+    {
+        _isPaused = !_isPaused;
+
+        if (_isPaused)
+        {
+            // Pauseボタンを非表示にし、PauseMenuを表示
+            pauseMenu.SetActive(true);
+            pause.SetActive(false);
+            Time.timeScale = 0f;
+            
+            // ここでカーソルを表示してロック解除
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            pauseMenu.SetActive(false);
+            pause.SetActive(true);
+            Time.timeScale = 1f;
+            
+            // ここでカーソルをロックして非表示に戻す
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
+    
     private void ResetButtonColors()
     {
         // 全てのボタンのテキストカラーをデフォルトに戻す
@@ -145,5 +190,10 @@ public class PauseMenu : MonoBehaviour
         {
             buttonText.color = defaultColor;
         }
+    }
+    
+    public bool get_isPaused()
+    {
+        return this._isPaused;
     }
 }
